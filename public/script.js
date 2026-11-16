@@ -87,8 +87,8 @@
     mental: {
       good: [["n_mental_relax", "relax", "breathe"], ["n_mental_walk", "wellness"], ["n_mental_retake", "calendar"]],
       mild: [["n_mental_relax", "relax", "breathe"], ["n_mental_sleep", "self-care"], ["n_mental_walk", "wellness"], ["n_mental_retake", "calendar"]],
-      moderate: [["n_mental_talk", "support"], ["n_mental_pro", "heart"], ["n_mental_sleep", "self-care"], ["n_mental_relax", "relax", "breathe"]],
-      high: [["n_mental_pro", "heart"], ["n_mental_talk", "support"], ["n_mental_relax", "relax", "breathe"], ["n_mental_sleep", "self-care"]]
+      moderate: [["n_mental_talk", "support"], ["n_mental_pro", "heart", "therapist"], ["n_mental_sleep", "self-care"], ["n_mental_relax", "relax", "breathe"]],
+      high: [["n_mental_pro", "heart", "therapist"], ["n_mental_talk", "support"], ["n_mental_relax", "relax", "breathe"], ["n_mental_sleep", "self-care"]]
     },
     iq: {
       dev: [["n_iq_practice", "growth"], ["n_iq_slow", "brain"], ["n_iq_retake", "calendar"]],

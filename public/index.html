@@ -10,6 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+<link rel="icon" href="mindcheck-logo.png">
+<link rel="stylesheet" href="therapist.css">
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true"><defs><linearGradient id="mc" gradientUnits="userSpaceOnUse" x1="3" y1="2" x2="21" y2="22"><stop offset="0" stop-color="#C9B8FF"/><stop offset="1" stop-color="#7B5CFF"/></linearGradient></defs>
@@ -63,7 +65,7 @@
   <header class="site-header">
     <nav class="nav container" aria-label="Main">
       <a class="brand" href="#/" aria-label="Mindcheck">
-        <span class="brand-mark">m</span><span>mindcheck<span class="brand-dot">.</span></span>
+        <img class="mindcheck-logo" src="mindcheck-logo.png" alt=""><span>mindcheck<span class="brand-dot">.</span></span>
       </a>
       <div class="nav-links" id="navLinks">
         <a href="#/" data-route="home" data-i18n="nav_home">Нүүр</a>
@@ -188,7 +190,7 @@
       </section>
 
       <section class="section container about-section" id="about">
-        <div class="about-mark">m<span>.</span></div>
+        <img class="about-logo" src="mindcheck-logo.png" alt="Mindcheck">
         <div class="about-copy"><div class="eyebrow" data-i18n="about_eyebrow"></div><h2 data-i18n="about_title"></h2><p data-i18n="about_text"></p><a class="text-link" href="#assessment-info"><span data-i18n="about_link"></span> <span data-ic="next"></span></a></div>
       </section>
 
@@ -220,7 +222,7 @@
 
   <footer class="footer">
     <div class="container footer-inner">
-      <a class="brand footer-brand" href="#/"><span class="brand-mark">m</span><span>mindcheck<span class="brand-dot">.</span></span></a>
+      <a class="brand footer-brand" href="#/"><img class="mindcheck-logo" src="mindcheck-logo.png" alt=""><span>mindcheck<span class="brand-dot">.</span></span></a>
       <span data-i18n="foot_rights"></span>
       <div class="footer-links"><a href="#about" data-i18n="foot_about"></a><a href="#assessment-info" data-i18n="foot_privacy"></a><a href="#/settings" data-i18n="s_title"></a></div>
     </div>
@@ -228,5 +230,6 @@
 
   <script src="data.js"></script>
   <script src="script.js"></script>
+<script src="therapist.js"></script>
 </body>
 </html>
