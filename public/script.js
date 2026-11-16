@@ -67,31 +67,17 @@
   darkMQ.addEventListener?.("change", applyTheme);
 
   /* ---------- scoring ---------- */
-  function scoreTest(id, ans) {
-    const T = TESTS[id];
-    if (id === "mental") {
-      const main = T.questions.slice(0, 9);
-      const raw = main.reduce((s, q, i) => s + (ans[i] || 0), 0);
-      const max = 36;
-      const band = raw <= 8 ? "good" : raw <= 17 ? "mild" : raw <= 26 ? "moderate" : "high";
-      const acc = {};
-      main.forEach((q, i) => { acc[q.cat] ??= { s: 0, n: 0 }; acc[q.cat].s += ans[i] || 0; acc[q.cat].n += 4; });
-      const cats = {};
-      for (const k in acc) cats[k] = Math.round((1 - acc[k].s / acc[k].n) * 100);
-      return { raw, max, pct: Math.round((1 - raw / max) * 100), band, cats, safety: (ans[9] || 0) > 0 };
-    }
+  function scoreMental(ans) {
+    const T = TESTS.mental;
+    const main = T.questions.slice(0, 9);
+    const raw = main.reduce((s, q, i) => s + (ans[i] || 0), 0);
+    const max = 36;
+    const band = raw <= 8 ? "good" : raw <= 17 ? "mild" : raw <= 26 ? "moderate" : "high";
     const acc = {};
-    let raw = 0;
-    T.questions.forEach((q, i) => {
-      acc[q.cat] ??= { c: 0, n: 0 };
-      acc[q.cat].n++;
-      if (ans[i] === q.a) { raw++; acc[q.cat].c++; }
-    });
+    main.forEach((q, i) => { acc[q.cat] ??= { s: 0, n: 0 }; acc[q.cat].s += ans[i] || 0; acc[q.cat].n += 4; });
     const cats = {};
-    for (const k in acc) cats[k] = Math.round((acc[k].c / acc[k].n) * 100);
-    const max = T.questions.length;
-    const band = raw <= 3 ? "dev" : raw <= 6 ? "avg" : raw <= 9 ? "above" : "high";
-    return { raw, max, pct: Math.round((raw / max) * 100), band, cats, safety: false };
+    for (const k in acc) cats[k] = Math.round((1 - acc[k].s / acc[k].n) * 100);
+    return { raw, max, pct: Math.round((1 - raw / max) * 100), band, cats, safety: (ans[9] || 0) > 0 };
   }
   const TONES = { mental: { good: "pos", mild: "mid", moderate: "warn", high: "bad" }, iq: { dev: "warn", avg: "mid", above: "pos", high: "pos" } };
   const tone = (r) => TONES[r.test][r.band];
@@ -113,7 +99,7 @@
   };
 
   /* ---------- router ---------- */
-  let timer = null, keyH = null, cur = null;
+  let timer = null, keyH = null, cur = null, routeVersion = 0;
   function cleanup() {
     clearInterval(timer); timer = null;
     if (keyH) { document.removeEventListener("keydown", keyH); keyH = null; }
@@ -123,6 +109,7 @@
   const setActive = (name) => $$("[data-route]").forEach((a) => a.classList.toggle("active", a.dataset.route === name));
 
   function route() {
+    routeVersion++;
     cleanup();
     closeMenu();
     const h = location.hash;
@@ -192,7 +179,52 @@
   });
 
   /* ---------- test runner ---------- */
-  function viewTest(id) {
+  async function apiData(url, options) {
+    const response = await fetch(url, options);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return (await response.json()).data;
+  }
+
+  async function loadIqTest() {
+    const version = routeVersion;
+    dyn.innerHTML = `<section class="page container narrow"><p role="status">${t("iq_loading")}</p></section>`;
+    try {
+      const tests = await apiData("/api/tests");
+      const test = tests.find((entry) => entry.test_type === "iq");
+      if (!test) throw new Error("No active IQ assessment");
+      const questions = await apiData(`/api/tests/${test.id}/questions`);
+      if (version !== routeVersion) return;
+      const signature = JSON.stringify([test.id, test.time_limit_seconds, questions]);
+      const saved = S.progress.iq;
+      if (saved && saved.signature !== signature) {
+        delete S.progress.iq;
+        save();
+      }
+      Object.assign(TESTS.iq, {
+        dbId: test.id,
+        signature,
+        timeLimit: test.time_limit_seconds,
+        minutes: Math.ceil(test.time_limit_seconds / 60),
+        questions: questions.map((question) => ({
+          id: question.id,
+          q: { mn: question.text },
+          o: { mn: question.options.map((option) => option.text) },
+          optionIds: question.options.map((option) => option.id)
+        }))
+      });
+      viewTest("iq", true);
+      hydrate(dyn);
+    } catch {
+      if (version !== routeVersion) return;
+      dyn.innerHTML = `<section class="page container narrow"><p role="alert">${t("iq_load_error")}</p>
+        <button class="button button-primary" id="retryIq" type="button">${t("retry")}</button>
+        <a class="back-link" href="#/">${t("go_home")}</a></section>`;
+      $("#retryIq").addEventListener("click", loadIqTest);
+    }
+  }
+
+  function viewTest(id, loaded = false) {
+    if (id === "iq" && !loaded) return loadIqTest();
     const T = TESTS[id];
     if (!T) return view404();
     const saved = S.progress[id];
@@ -206,7 +238,7 @@
         <p class="lead">${t(id + "_intro")}</p>
         <ul class="facts">
           <li>${ic("tests")} ${t("t_questions", { n })}</li>
-          <li>${ic("history")} ${t("t_minutes", { n: T.minutes })}</li>
+          ${(id !== "iq" || T.timeLimit) ? `<li>${ic("history")} ${t("t_minutes", { n: T.minutes })}</li>` : ""}
           <li>${ic("privacy")} ${t("t_private")}</li>
         </ul>
         ${saved ? `<div class="notice">${ic("info")} <span>${t("t_saved_progress", { a: saved.answers.filter((x) => x != null).length, b: n })}</span></div>` : ""}
@@ -224,7 +256,7 @@
   }
 
   function persist() {
-    S.progress[cur.id] = { answers: cur.answers, idx: cur.idx, start: cur.start };
+    S.progress[cur.id] = { answers: cur.answers, idx: cur.idx, start: cur.start, signature: TESTS[cur.id].signature };
     save();
   }
 
@@ -251,7 +283,7 @@
   function renderQ() {
     const T = TESTS[cur.id], n = T.questions.length, i = cur.idx, q = T.questions[i];
     const opts = T.scale ? [0, 1, 2, 3, 4].map((v) => t("sc" + v)) : L(q.o);
-    const sel = cur.answers[i];
+    const sel = T.scale ? cur.answers[i] : q.optionIds.indexOf(cur.answers[i]);
     const canNext = T.scale ? sel != null : true;
     const last = i === n - 1;
     const left = cur.deadline ? Math.max(0, Math.round((cur.deadline - Date.now()) / 1000)) : null;
@@ -278,16 +310,20 @@
   }
 
   function choose(k) {
-    cur.answers[cur.idx] = k; persist(); renderQ();
+    if (cur.submitting || cur.scoreFailed) return;
+    const T = TESTS[cur.id];
+    cur.answers[cur.idx] = T.scale ? k : T.questions[cur.idx].optionIds[k];
+    persist(); renderQ();
     $(".option.on")?.focus();
   }
   function next() {
+    if (cur.submitting || cur.scoreFailed) return;
     const T = TESTS[cur.id];
     if (T.scale && cur.answers[cur.idx] == null) return;
     if (cur.idx === T.questions.length - 1) return finish(false);
     cur.idx++; persist(); renderQ(); window.scrollTo(0, 0);
   }
-  function back() { if (cur.idx > 0) { cur.idx--; persist(); renderQ(); window.scrollTo(0, 0); } }
+  function back() { if (!cur.submitting && !cur.scoreFailed && cur.idx > 0) { cur.idx--; persist(); renderQ(); window.scrollTo(0, 0); } }
   function onKey(e) {
     if (!cur || e.target.closest("input,textarea,select")) return;
     const T = TESTS[cur.id], max = T.scale ? 5 : L(T.questions[cur.idx].o).length;
@@ -296,9 +332,36 @@
     else if (e.key === "ArrowLeft") back();
   }
 
-  function finish(timeUp) {
-    const T = TESTS[cur.id];
-    const res = scoreTest(cur.id, cur.answers);
+  async function finish(timeUp) {
+    if (!cur || cur.submitting) return;
+    const run = cur;
+    const T = TESTS[run.id];
+    let res;
+    if (run.id === "iq") {
+      run.submitting = true;
+      clearInterval(timer);
+      try {
+        const answers = T.questions.flatMap((question, index) => run.answers[index] == null
+          ? [] : [{ questionId: question.id, optionId: run.answers[index] }]);
+        res = await apiData(`/api/tests/${T.dbId}/score`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers })
+        });
+      } catch {
+        if (cur !== run) return;
+        run.submitting = false;
+        run.scoreFailed = true;
+        dyn.innerHTML = `<section class="page container narrow"><p role="alert">${t("iq_score_error")}</p>
+          <button class="button button-primary" id="retryScore" type="button">${t("retry")}</button>
+          <a class="back-link" href="#/">${t("go_home")}</a></section>`;
+        $("#retryScore").addEventListener("click", () => finish(timeUp));
+        return;
+      }
+      if (cur !== run) return;
+    } else {
+      res = scoreMental(run.answers);
+    }
     const rec = { id: uid(), test: cur.id, date: Date.now(), answers: cur.answers, lang: S.lang, fav: false, duration: Math.round((Date.now() - cur.start) / 1000), ...res };
     S.history.unshift(rec);
     delete S.progress[cur.id];
@@ -310,10 +373,10 @@
 
   /* ---------- result ---------- */
   function summaryText(r) {
-    const lines = [`Mindcheck — ${t(r.test + "_title")}`, fmtDate(r.date), "", scoreLine(r), t(`b_${r.test}_${r.band}`), ""];
+    const lines = [`Mindcheck — ${t(r.test + "_title")}`, fmtDate(r.date), "", scoreLine(r), r.feedback?.title || t(`b_${r.test}_${r.band}`), ""];
     lines.push(t("r_breakdown") + ":");
     for (const k in r.cats) lines.push(`• ${t("cat_" + k)}: ${r.cats[k]}%`);
-    lines.push("", t(`d_${r.test}_${r.band}`), "", t("r_disclaimer"));
+    lines.push("", r.feedback?.description || t(`d_${r.test}_${r.band}`), r.feedback?.advice || "", t("r_disclaimer"));
     return lines.join("\n");
   }
 
@@ -326,7 +389,7 @@
     const tn = tone(r);
     const C = 2 * Math.PI * 52;
     const big = r.test === "mental" ? `${r.pct}<small>%</small>` : `${r.raw}<small>/${r.max}</small>`;
-    const bars = Object.keys(r.cats).map((k) => `<div class="bar-row"><div class="bar-top"><span>${t("cat_" + k)}</span><b>${r.cats[k]}%</b></div><div class="bar"><i style="width:${r.cats[k]}%"></i></div></div>`).join("");
+    const bars = Object.keys(r.cats).map((k) => `<div class="bar-row"><div class="bar-top"><span>${esc(t("cat_" + k))}</span><b>${r.cats[k]}%</b></div><div class="bar"><i style="width:${r.cats[k]}%"></i></div></div>`).join("");
     const steps = (NEXT_STEPS[r.test][r.band] || []).map(([key, icon, act]) =>
       act ? `<li><button type="button" class="step-act" data-act="${act}">${ic(icon, "grad")}<span>${t(key)}</span>${ic("next")}</button></li>` : `<li><span class="step-act static">${ic(icon, "grad")}<span>${t(key)}</span></span></li>`).join("");
     const d = r.duration || 0;
@@ -346,8 +409,9 @@
       <div class="result-grid">
         <div class="card score-card tone-${tn}">
           <div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-bg" cx="60" cy="60" r="52"/><circle class="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="${(C * r.pct) / 100} ${C}" transform="rotate(-90 60 60)"/></svg><div class="ring-num">${big}</div></div>
-          <span class="badge">${t(`b_${r.test}_${r.band}`)}</span>
-          <p>${t(`d_${r.test}_${r.band}`)}</p>
+          <span class="badge">${esc(r.feedback?.title || t(`b_${r.test}_${r.band}`))}</span>
+          <p>${esc(r.feedback?.description || t(`d_${r.test}_${r.band}`))}</p>
+          ${r.feedback?.advice ? `<p>${esc(r.feedback.advice)}</p>` : ""}
           ${d ? `<p class="fine">${t("r_time", { m: Math.floor(d / 60), s: d % 60 })}</p>` : ""}
           ${r.test === "iq" ? `<p class="fine">${t("iq_note")}</p>` : ""}
         </div>
@@ -413,7 +477,7 @@
       $("#hList").innerHTML = rows.length ? `<div class="hist-list">${rows.map((r) => `
         <article class="hist-item tone-${tone(r)}">
           <span class="hist-ic">${ic(TESTS[r.test].icon, "grad")}</span>
-          <div class="hist-main"><a class="hist-title" href="#/result/${r.id}">${t(r.test + "_title")}</a><div class="hist-sub">${ic("calendar")} ${fmtDate(r.date)} · <span class="badge sm">${t(`b_${r.test}_${r.band}`)}</span></div></div>
+          <div class="hist-main"><a class="hist-title" href="#/result/${r.id}">${t(r.test + "_title")}</a><div class="hist-sub">${ic("calendar")} ${fmtDate(r.date)} · <span class="badge sm">${esc(r.feedback?.title || t(`b_${r.test}_${r.band}`))}</span></div></div>
           <div class="hist-score">${r.test === "mental" ? r.pct + "%" : r.raw + "/" + r.max}</div>
           <button class="icon-btn${r.fav ? " fav-on" : ""}" type="button" data-fav="${r.id}" aria-pressed="${!!r.fav}" aria-label="${t(r.fav ? "r_unfav" : "r_fav")}">${ic("favorite")}</button>
           <button class="icon-btn danger" type="button" data-del="${r.id}" aria-label="${t("r_delete")}">${ic("delete")}</button>

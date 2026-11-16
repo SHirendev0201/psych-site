@@ -66,7 +66,7 @@ button{cursor:pointer}
 .text-link{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--brand)}
 
 /* hero */
-.eyebrow{font-size:10px;letter-spacing:2px;font-weight:800;color:var(--brand);margin-bottom:19px}
+.eyebrow{font-size:30px;letter-spacing:2px;font-weight:800;color:var(--brand);margin-bottom:19px}
 .eyebrow-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 2px #7B5CFF40;margin-right:8px}
 .hero{min-height:570px;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:40px;padding-top:55px;padding-bottom:65px}
 .hero h1{font-family:Manrope,"Noto Sans",sans-serif;font-size:clamp(36px,5vw,58px);line-height:1.16;letter-spacing:-2.6px;margin:0 0 22px;font-weight:800}
@@ -137,7 +137,7 @@ button{cursor:pointer}
 
 /* check-in */
 .split{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:var(--shadow)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:30px;box-shadow:var(--shadow)}
 .mood-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .mood-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px;border:1.5px solid var(--line);background:var(--paper);border-radius:12px;transition:transform .15s,border-color .15s,background .15s}
 .mood-btn:hover{transform:translateY(-2px);border-color:var(--brand-soft)}
