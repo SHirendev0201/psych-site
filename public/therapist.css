@@ -22,3 +22,25 @@
 .therapist-footer p{font-size:11px;text-align:center;line-height:1.6;color:var(--muted);margin:10px 0 0}
 .therapist-panel :focus-visible{outline:3px solid var(--brand);outline-offset:3px}
 @media(max-width:480px){.therapist-panel{padding:20px;border-radius:20px}.therapist-profile{padding:16px;gap:16px}.therapist-panel h3{font-size:18px}.therapist-photo{flex-basis:80px}.therapist-photo img{width:80px;height:96px}.therapist-panel h2{font-size:18px}}
+
+/* Match the site's type scale without changing profile content. */
+.therapist-panel{font-family:"Noto Sans",system-ui,sans-serif;line-height:1.6}
+.therapist-panel h2{font-size:20px;font-weight:700;line-height:1.45;letter-spacing:-.02em;text-wrap:balance}
+.therapist-panel h3{font-size:21px;font-weight:700;line-height:1.4;letter-spacing:-.02em;text-wrap:balance}
+.therapist-profile>div{min-width:0}
+.therapist-role{font-size:14px;line-height:1.6}
+.therapist-status{font-size:12px;line-height:1.5}
+.therapist-about{font-size:14px;line-height:1.8}
+.therapist-photo figcaption,.therapist-details dt,.therapist-footer p{font-size:12px;line-height:1.6}
+.therapist-details{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 18px}
+.therapist-details dd{font-size:14px;line-height:1.6}
+.therapist-footer .button{font-size:14px;line-height:1.5;opacity:1}
+@media(max-width:480px){
+  .therapist-panel h2{font-size:18px}
+  .therapist-panel h3{font-size:19px}
+  .therapist-profile{align-items:flex-start}
+}
+@media(max-width:360px){
+  .therapist-profile{flex-direction:column}
+  .therapist-details{grid-template-columns:1fr}
+}

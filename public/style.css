@@ -344,3 +344,65 @@ button{cursor:pointer}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition-duration:.01ms!important}}
 @media print{.site-header,.footer,.result-actions,.actions,.toast{display:none!important}}
+
+/* Consistent typography and wrapping across all screens. */
+body{font-size:15px;line-height:1.6}
+button,input,select,textarea{font-family:inherit}
+h1,h2,h3,.h2,.h3,.quiz-q{font-family:"Noto Sans",system-ui,sans-serif;font-weight:700;text-wrap:balance;overflow-wrap:break-word}
+p,li,dd,dt,summary{overflow-wrap:break-word}
+.hero h1{font-family:"Noto Sans",system-ui,sans-serif;font-size:clamp(34px,4.4vw,54px);line-height:1.22;letter-spacing:-.035em}
+.section-heading h2,.about-copy h2,.h2{font-family:"Noto Sans",system-ui,sans-serif;line-height:1.3;letter-spacing:-.025em}
+.page h1{font-family:"Noto Sans",system-ui,sans-serif;line-height:1.3;letter-spacing:-.025em}
+.eyebrow{font-size:12px;line-height:1.5;font-weight:700;letter-spacing:.08em;margin-bottom:14px}
+.hero-text{font-size:16px;line-height:1.8}
+.section-heading p,.about-copy p,.lead{font-size:15px;line-height:1.8}
+.assessment-card>p,.step p,.score-card p,.faq details p{font-size:14px;line-height:1.8}
+.assessment-card h3{font-size:20px;line-height:1.4;letter-spacing:-.015em;margin-bottom:12px}
+.step h3,.h3{font-size:18px;line-height:1.45;letter-spacing:-.01em}
+.button,.option,.step-act,.chip{font-size:14px;line-height:1.5}
+.button{text-align:center;justify-content:center}
+.text-link,.back-link,.card-link{font-size:13px;line-height:1.5}
+.hero-note,.fine,.disclaimer p,.footer-inner>span,.footer-links{font-size:12px;line-height:1.7}
+.card-label,.wk-title,.trust-inner>span{font-size:11px;line-height:1.5;letter-spacing:.06em;font-weight:700}
+.card-meta,.facts li,.hist-sub,.stat span,.quiz-top{font-size:12px;line-height:1.6}
+.card-meta{flex-wrap:wrap}
+.section-heading,.page-head,.bar-top{gap:16px}
+.hero>*,.split>*,.assessment-grid>*,.result-grid>*,.steps-list>*,.section-heading>*,.page-head>*,.relax-card>*{min-width:0}
+.card-top{gap:12px}
+.step-act>span,.faq summary span{min-width:0;overflow-wrap:break-word}
+.step-act{height:100%;align-items:center;font-weight:600}
+.bar-top{align-items:baseline;font-size:13px}
+.bar-top>:last-child{flex-shrink:0;font-variant-numeric:tabular-nums}
+.quiz-q{font-family:"Noto Sans",system-ui,sans-serif;line-height:1.5;letter-spacing:-.015em}
+.quiz-q small{font-size:12px;line-height:1.6;letter-spacing:.02em}
+.notice,.reminder,.crisis p{font-size:14px;line-height:1.7}
+.badge{line-height:1.5;font-weight:700}
+.breathe-inner h2{padding:0 28px;line-height:1.4}
+.nav-links{line-height:1.5}
+.nav-cta{white-space:nowrap}
+.brand{white-space:nowrap}
+.art-question{letter-spacing:-.02em;line-height:1.4}
+@media(max-width:760px){
+  .hero h1{font-size:clamp(32px,8.5vw,42px)}
+  .hero-text{font-size:15px}
+  .section-heading p,.about-copy p,.lead{font-size:14px}
+  .trust-inner{flex-wrap:wrap;justify-content:center;padding-block:16px;gap:12px 20px}
+  .trust-inner div{font-size:12px;line-height:1.5}
+  .page-head{flex-wrap:wrap}
+  .quiz-nav .button{min-width:0;padding-inline:12px}
+  .hero-actions{gap:16px}
+  .stat span{font-size:12px;overflow-wrap:break-word}
+}
+@media(max-width:380px){
+  .brand{font-size:18px;gap:6px;letter-spacing:-.5px}
+  .nav-tools{gap:3px}
+  .icon-btn{min-width:34px;padding-inline:6px}
+  .nav .mindcheck-logo{width:40px;height:36px}
+  .stats{grid-template-columns:1fr}
+}
+
+/* Extend the existing test link over its entire assessment card. */
+.assessment-card{position:relative;isolation:isolate;cursor:pointer}
+.assessment-card .card-link::after{content:"";position:absolute;inset:0;z-index:3;border-radius:inherit}
+.assessment-card:focus-within{outline:2px solid var(--brand);outline-offset:4px}
+.assessment-card .card-link:focus-visible{outline:none}
